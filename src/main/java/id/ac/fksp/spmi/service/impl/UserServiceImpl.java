@@ -11,9 +11,17 @@ import id.ac.fksp.spmi.payload.response.UserResponse;
 import id.ac.fksp.spmi.repository.RoleRepository;
 import id.ac.fksp.spmi.repository.UserRepository;
 import id.ac.fksp.spmi.service.UserService;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +31,38 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service @Transactional
-public class UserServiceImpl implements UserService {
+@Service @Transactional @Slf4j @NoArgsConstructor
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    /**
+     * implements user detail service
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()){
+            log.error("Username not found in database");
+            throw new UsernameNotFoundException("User tidak ditemukan");
+        }else {
+            log.error("Username found");
+        }
+
+        User user = userOptional.get();
+
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        });
+
+        return new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
+
+    }
 
     @Override
     public UserResponse saveUser(UserSaveRequest request) {
@@ -53,11 +86,11 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoles(roles);
         userRepository.save(user);
 
-        return new UserResponse(user.getId(), user.getUsername(), user.getPassword(), user.getRoles());
+        return new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getRoles());
     }
 
     @Override
@@ -104,4 +137,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(UserUpdateRequest request, String userId) {
         return null;
     }
+
+
 }
