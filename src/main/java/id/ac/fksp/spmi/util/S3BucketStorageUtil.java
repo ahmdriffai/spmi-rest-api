@@ -4,6 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ public class S3BucketStorageUtil {
 
     @Value("${s3.do.bucket}")
     private String bucketName;
+
+    @Value("${s3.do.secretKey}")
+    private String secretKey;
 
     public String uploadFile(String folder, MultipartFile file) {
         String fileName = null;
@@ -53,5 +57,26 @@ public class S3BucketStorageUtil {
         }
         String spaceLink = "https://storage-fksp.sgp1.digitaloceanspaces.com";
         return String.format("%s/%s/%s", spaceLink,folder, fileName);
+    }
+
+    public boolean deleteFile(String file){
+        try {
+            /* Create an Object of DeleteObjectsRequest - Arguments: BucketName */
+            DeleteObjectRequest request = new DeleteObjectRequest(bucketName,file);
+            /* Send Delete Object Request */
+            /* Delete single object 's3.png' */
+            amazonS3.deleteObject(request);
+
+            return true;
+
+        }catch (AmazonServiceException exception){
+            System.out.println(exception.getMessage());
+        }finally {
+            if (amazonS3 != null){
+                amazonS3.shutdown();
+            }
+        }
+
+        return false;
     }
 }

@@ -2,15 +2,16 @@ package id.ac.fksp.spmi.controller;
 
 import id.ac.fksp.spmi.payload.request.AnnouncementListRequest;
 import id.ac.fksp.spmi.payload.request.AnnouncementSaveRequest;
+import id.ac.fksp.spmi.payload.request.AnnouncementUpdateRequest;
 import id.ac.fksp.spmi.payload.response.AnnouncementResponse;
 import id.ac.fksp.spmi.payload.response.ApiResponse;
-import id.ac.fksp.spmi.payload.response.UserResponse;
 import id.ac.fksp.spmi.service.AnnouncementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,10 +23,10 @@ public class AnnouncementController {
 
     @PostMapping
     public ResponseEntity<?> saveAnnouncement(
-            @RequestParam("title") String title,
-            @RequestParam("content") String content,
-            @RequestParam("image") MultipartFile image,
-            @RequestParam("pdf") MultipartFile pdf
+            @RequestParam("title") @Valid String title,
+            @RequestParam("content") @Valid String content,
+            @RequestParam("image") @Valid MultipartFile image,
+            @RequestParam("pdf") @Valid MultipartFile pdf
     ){
 
         AnnouncementSaveRequest request = new AnnouncementSaveRequest(
@@ -58,12 +59,33 @@ public class AnnouncementController {
     }
 
     @GetMapping("/{announcementId}")
-    public ResponseEntity<?> getUser(@PathVariable Long announcementId){
+    public ResponseEntity<?> getAnnouncement(@PathVariable Long announcementId){
         AnnouncementResponse announcement = announcementService.getAnnouncement(announcementId);
         return ResponseEntity.ok(new ApiResponse<AnnouncementResponse>(
                 true,
                 "succes get user by id : " + announcement.getTitle(),
                 announcement
+        ));
+    }
+
+    @PutMapping("/{announcementId}")
+    public ResponseEntity<?> updateAnnouncement(
+            @PathVariable Long announcementId,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("pdf") MultipartFile pdf
+    ){
+
+        @Valid
+        AnnouncementUpdateRequest request = new AnnouncementUpdateRequest(title,content,image,pdf);
+
+        AnnouncementResponse response = announcementService.updateAnnouncement(announcementId,request);
+
+        return ResponseEntity.ok(new ApiResponse<AnnouncementResponse>(
+                true,
+                "succes update announcement",
+                response
         ));
     }
 }
