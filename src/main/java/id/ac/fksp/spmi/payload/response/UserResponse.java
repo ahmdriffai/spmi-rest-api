@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data @NoArgsConstructor @AllArgsConstructor
 public class UserResponse {
-    private String id;
+    private Long id;
     private String username;
     private String email;
     private Collection<Role> roles = new ArrayList<>();

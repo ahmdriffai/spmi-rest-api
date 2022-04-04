@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable String userId){
+    public ResponseEntity<?> getUser(@PathVariable Long userId){
         UserResponse userResponse = userService.getUser(userId);
         return ResponseEntity.ok(new ApiResponse<UserResponse>(
            true,

@@ -11,6 +11,7 @@ import id.ac.fksp.spmi.payload.response.UserResponse;
 import id.ac.fksp.spmi.repository.RoleRepository;
 import id.ac.fksp.spmi.repository.UserRepository;
 import id.ac.fksp.spmi.service.UserService;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service @Transactional @Slf4j @NoArgsConstructor
+@Service @Transactional @Slf4j @NoArgsConstructor @AllArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
@@ -104,7 +105,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserResponse getUser(String id) {
+    public UserResponse getUser(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()){
             throw  new UserException("User tidak ditemukan");

@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserService {
     UserResponse saveUser(UserSaveRequest request);
     List<UserResponse> listUser(UserListRequest reques);
-    UserResponse getUser(String id);
+    UserResponse getUser(Long id);
     void addRoleUser(UserAddRoleRequest request );
     UserResponse updateUser(UserUpdateRequest request, String userId);
 }
